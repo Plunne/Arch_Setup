@@ -1,5 +1,6 @@
 #!/bin/sh
 
 # Unmount USB
-umount -R /mnt
+umount -IR /mnt
+sleep 2
 shutdown now

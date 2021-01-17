@@ -24,7 +24,9 @@ grub-install --target=x86_64-efi --bootloader-id=grub_uefi --recheck
 grub-mkconfig -o /boot/grub/grub.cfg
 
 # Users
+echo "ROOT"
 passwd
+echo "USER"
 useradd -m plunne
 passwd plunne
 usermod -aG wheel,audio,video,optical,storage plunne
@@ -49,4 +51,3 @@ sed -i 's@#Include = /etc/pacman.d/mirrorlist@Include = /etc/pacman.d/mirrorlist
 
 # END CHROOT
 echo "Install complete"
-exit
