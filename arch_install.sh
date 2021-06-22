@@ -4,25 +4,7 @@
 timedatectl set-timezone Europe/Paris
 timedatectl set-ntp true
 
-fdisk /dev/sda << EOF
-g
-n
-1
-
-+512M
-n
-2
-
-
-t
-1
-1
-t
-2
-20
-
-w
-EOF
+cfdisk /dev/sda
 
 # Format partitions
 mkfs.vfat -F32 /dev/sda1
@@ -33,18 +15,19 @@ mount /dev/sda2 /mnt
 mkdir -p /mnt/boot/EFI && mount -t vfat /dev/sda1 /mnt/boot/EFI
 
 # Prepare CHROOT
-pacstrap /mnt base base-devel linux-lts linux-firmware nano
-genfstab -U -p /mnt >> /mnt/etc/fstab
+pacstrap /mnt base base-devel linux-lts linux-firmware
+genfstab -U /mnt >> /mnt/etc/fstab
 
 # START CHROOT
 echo "START CHROOT"
-arch-chroot /mnt /bin/sh <<EOF
+arch-chroot /mnt <<EOF
 
 ln -sf /usr/share/zoneinfo/EUROPE/PARIS /etc/localtime
-hwclock --systohc
 
 sed -i 's/#en_US.UTF-8/en_US.UTF-8/p' /etc/locale.gen
 locale-gen
+
+echo LANG=en_US.UTF-8 > /etc/locale.conf
 
 echo arch > /etc/hostname
 
@@ -53,18 +36,23 @@ echo ::1          localhost > /etc/hosts
 echo 127.0.1.1    arch.localdomain    arch > /etc/hosts
 
 mkinitcpio -p linux-lts
+EOF
 
-pacman -Sy -y && pacman -S -y grub efibootmgr sudo pacman-contrib wget networkmanager dhcpcd
+echo "ROOT"
+arch-chroot /mnt passwd
+
+echo "USER"
+arch-chroot /mnt useradd -m plunne
+arch-chroot /mnt passwd plunne
+arch-chroot /mnt usermod -aG wheel,audio,video,optical,storage plunne
+
+arch-chroot /mnt <<EOF
+
+pacman -Sy
+pacman -S grub efibootmgr sudo pacman-contrib wget networkmanager dhcpcd
 
 grub-install --target=x86_64-efi --bootloader-id=grub_uefi --recheck 
 grub-mkconfig -o /boot/grub/grub.cfg
-
-echo "ROOT"
-passwd
-echo "USER"
-useradd -m plunne
-passwd plunne
-usermod -aG wheel,audio,video,optical,storage plunne
 
 sed -i 's/# %wheel ALL=(ALL) ALL/%wheel ALL=(ALL) ALL/p' /etc/sudoers.tmp
 
