@@ -1,4 +1,13 @@
-#!/bin/sh
+#!/bin/bash
+
+USER_NAME=plunne
+HOST_NAME=btw
+
+echo "ROOT PASSWORD "
+read -s ROOT_PASSWD
+
+echo "USER PASSWORD "
+read -s USER_PASSWD
 
 # Time
 timedatectl set-timezone Europe/Paris
@@ -20,7 +29,7 @@ genfstab -U /mnt >> /mnt/etc/fstab
 
 # START CHROOT
 echo "START CHROOT"
-arch-chroot /mnt <<EOF
+arch-chroot /mnt /bin/bash << EOF
 
 ln -sf /usr/share/zoneinfo/EUROPE/PARIS /etc/localtime
 
@@ -29,24 +38,21 @@ locale-gen
 
 echo LANG=en_US.UTF-8 > /etc/locale.conf
 
-echo arch > /etc/hostname
+echo $HOST_NAME > /etc/hostname
 
 echo 127.0.0.1    localhost > /etc/hosts
 echo ::1          localhost > /etc/hosts
-echo 127.0.1.1    arch.localdomain    arch > /etc/hosts
+echo 127.0.1.1    $HOST_NAME.localdomain    $HOST_NAME > /etc/hosts
 
 mkinitcpio -p linux-lts
-EOF
 
 echo "ROOT"
-arch-chroot /mnt passwd
+echo -e "$ROOT_PASSWD\n$ROOT_PASSWD" | passwd
 
 echo "USER"
-arch-chroot /mnt useradd -m plunne
-arch-chroot /mnt passwd plunne
-arch-chroot /mnt usermod -aG wheel,audio,video,optical,storage plunne
-
-arch-chroot /mnt <<EOF
+useradd -m $USER_NAME
+echo -e "$USER_PASSWD\n$USER_PASSWD" | passwd $USER_NAME
+usermod -aG wheel,audio,video,optical,storage $USER_NAME
 
 pacman -Sy
 pacman -S grub efibootmgr sudo pacman-contrib wget networkmanager dhcpcd
@@ -70,9 +76,9 @@ sed -i 's@#Include = /etc/pacman.d/mirrorlist@Include = /etc/pacman.d/mirrorlist
 
 echo "Install complete"
 
+exit
+
 EOF
 
 # Unmount USB
-umount -IR /mnt
-sleep 2
-shutdown now
+umount -R /mnt
