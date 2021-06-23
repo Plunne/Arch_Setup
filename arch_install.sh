@@ -25,7 +25,7 @@ git clone https://github.com/Plunne/Arch_Setup.git
 cp -r Arch_Setup/arch_chroot.sh .
 EOF
 
-arch-chroot /mnt ./arch_chroot.sh
+arch-chroot /mnt
 
 echo "Unmounting..."
 umount -R /mnt
