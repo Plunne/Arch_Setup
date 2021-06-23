@@ -41,9 +41,6 @@ rankmirrors -n 5 $list > /etc/pacman.d/mirrorlist
 systemctl enable NetworkManager
 systemctl enable dhcpcd
 
-sed -i 's/#[multilib]/[multilib]/p' /etc/pacman.conf
-sed -i 's@#Include = /etc/pacman.d/mirrorlist@Include = /etc/pacman.d/mirrorlist@p' /etc/pacman.conf
-
 echo "Install complete !"
 
 exit
