@@ -30,7 +30,7 @@ echo "***** GRUB *****"
 grub-install --target=x86_64-efi --efi-directory=/boot/efi --bootloader-id=grub_uefi --recheck 
 grub-mkconfig -o /boot/grub/grub.cfg
 
-sed -i 's@^# %wheel ALL@%wheel ALL@p' /etc/sudoers.tmp
+sed -i 's@^# %wheel ALL@%wheel ALL@p' /etc/sudoers
 
 cp /etc/pacman.d/mirrorlist /etc/pacman.d/mirrorlist.backup
 list=$(mktemp)
