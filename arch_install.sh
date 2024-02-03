@@ -27,6 +27,8 @@ EOF
 
 arch-chroot /mnt
 
+# Run arch_chroot.sh
+
 echo "Unmounting..."
 umount -R /mnt
 
